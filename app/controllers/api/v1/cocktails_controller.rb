@@ -26,9 +26,19 @@ module Api
         render json: cocktail_json
       end
 
-      # def create
-      #   byebug
-      # end
+      def create
+        @cocktail = Cocktail.new(name: params["cocktail"]["name"], description: params["cocktail"]["description"], instructions: params["cocktail"]["instructions"], source: params["cocktail"]["source"])
+
+        if @cocktail.save
+        params["cocktail"]["proportions"].each do |proportion|
+          @ingredient = Ingredient.find_or_create_by(name: proportion["ingredient_name"])
+
+          @proportion = Proportion.create(cocktail_id: @cocktail.id, ingredient_id: @ingredient.id, amount: proportion["amount"])
+          # create Proportion
+          @cocktail.proportions << @proportion
+          end
+        end
+      end
 
       def edit
 
@@ -41,6 +51,13 @@ module Api
       def destroy
 
       end
+
+      private
+
+      # def cocktail_params
+      #   params.require(:cocktail).permit(:name, :instructions, :description, :source, :proportions)
+      # end
+
     end
   end
 end
